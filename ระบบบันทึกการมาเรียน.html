@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบบันทึกการมาเรียน</title>
+    <style>
+        /* พื้นฐานของหน้า */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding-top: 70px;
+        }
+
+        /* แถบหัวเรื่อง */
+        .header-bar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background-color: #d32f2f;
+            color: white;
+            padding: 15px 0;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        /* คอนเทนเนอร์หลัก */
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 30px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #d32f2f;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 30px;
+        }
+
+        /* ฟิลด์ค้นหาและเลือกห้องเรียน */
+        .search-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .search-bar input[type="text"], .search-bar select {
+            padding: 10px;
+            width: 48%;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        /* ฟอร์มบันทึกการมาเรียน */
+        form {
+            display: grid;
+            gap: 15px;
+            grid-template-columns: 1fr 1fr;
+            margin-bottom: 30px;
+        }
+
+        form select, form input[type="date"], button {
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: #d32f2f;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            grid-column: span 2;
+        }
+
+        button:hover {
+            background-color: #b71c1c;
+        }
+
+        /* ตารางแสดงข้อมูล */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #ccc;
+        }
+
+        th {
+            background-color: #d32f2f;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        /* ปุ่มในตาราง */
+        .action-btn {
+            padding: 6px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .edit-btn {
+            background-color: #1976d2;
+            color: white;
+        }
+
+        .delete-btn {
+            background-color: #d32f2f;
+            color: white;
+        }
+
+        .summary {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+
+        .summary-box {
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #d32f2f;
+            color: white;
+            text-align: center;
+            flex: 1;
+            margin: 0 10px;
+        }
+
+        .summary-box h2 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        /* ลิงก์ */
+        .links {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .links a {
+            color: #d32f2f;
+            text-decoration: none;
+            font-size: 18px;
+            margin: 0 15px;
+            transition: color 0.3s ease;
+        }
+
+        .links a:hover {
+            color: #b71c1c;
+        }
+
+        @media (max-width: 600px) {
+            .search-bar {
+                flex-direction: column;
+            }
+
+            .search-bar input[type="text"], .search-bar select {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+
+            form {
+                grid-template-columns: 1fr;
+            }
+
+            button {
+                grid-column: span 1;
+            }
+
+            .summary {
+                flex-direction: column;
+            }
+
+            .summary-box {
+                margin-bottom: 15px;
+            }
+
+            .links a {
+                display: block;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-bar">ระบบบันทึกการมาเรียนโรงเรียนสกลราชวิทยานุกูล</div>
+
+    <div class="container">
+        <h1>บันทึกการมาเรียน</h1>
+
+        <!-- ฟิลด์ค้นหา -->
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="ค้นหานักเรียน...">
+            <select id="classFilter">
+                <option value="">เลือกห้องเรียน</option>
+                <!-- ห้องเรียน -->
+                <option value="5/1">5/1</option>
+                <option value="5/2">5/2</option>
+                <option value="5/3">5/3</option>
+            </select>
+        </div>
+
+        <!-- ฟอร์มบันทึกการมาเรียน -->
+        <form id="attendanceForm">
+            <select name="student" required>
+                <option value="">เลือกนักเรียน</option>
+                <option value="นักเรียน 1">นักเรียน 1</option>
+                <option value="นักเรียน 2">นักเรียน 2</option>
+                <option value="นักเรียน 3">นักเรียน 3</option>
+            </select>
+            <input type="date" name="date" required>
+            <select name="status" required>
+                <option value="">สถานะการมาเรียน</option>
+                <option value="present">มาเรียน</option>
+                <option value="absent">ไม่มาเรียน</option>
+                <option value="late">มาสาย</option>
+            </select>
+            <button type="submit">บันทึก</button>
+        </form>
+
+        <!-- ตารางแสดงข้อมูล -->
+        <table id="attendanceTable">
+            <thead>
+                <tr>
+                    <th>ชื่อผู้เรียน</th>
+                    <th>วันที่</th>
+                    <th>สถานะ</th>
+                    <th>การกระทำ</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- ข้อมูลตัวอย่าง -->
+                <tr>
+                    <td>นักเรียน 1</td>
+                    <td>2024-10-01</td>
+                    <td>มาเรียน</td>
+                    <td>
+                        <button class="action-btn edit-btn">แก้ไข</button>
+                        <button class="action-btn delete-btn">ลบ</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- สรุปสถานะ -->
+        <div class="summary">
+            <div class="summary-box">
+                <h2 id="presentCount">0</h2>
+                <p>มาเรียน</p>
+            </div>
+            <div class="summary-box">
+                <h2 id="absentCount">0</h2>
+                <p>ไม่มาเรียน</p>
+            </div>
+            <div class="summary-box">
+                <h2 id="lateCount">0</h2>
+                <p>มาสาย</p>
+            </div>
+        </div>
+        
+        <!-- ลิงก์ไปหน้าอื่น -->
+        <div class="links">
+            <a href="index.html">กลับไปหน้าแรก</a>
+            <a href="Dashboard.html">ดูสถิติ</a>
+        </div>
+    </div>
+
+</body>
+</html>
